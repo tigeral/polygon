@@ -64,7 +64,7 @@ def calculate(data):
                     display(data, filledCells, col, stack, result)
                 prevVal = floodLevel
         prevVal = val
-    display(data, filledCells, len(data) - 1, stack, result)
+        display(data, filledCells, col, stack, result)
 
 
 def display(data, filledCells, step, stack, result):
@@ -109,12 +109,13 @@ def display(data, filledCells, step, stack, result):
     # render stack
     text += '\nstack:\n'
     colIndexWidth = len(str(len(data)))
-    for row in range(max(len(stack), stackHeight), 0, -1):
+    for row in range(max(len(stack), stackHeight), -1, -1):
         if row >= len(stack):
             text += '[' + (' ' * (colIndexWidth + valueWidth + 4)) + ']\n'
+        elif row == 0:
+            text += ('[_{0:_>' + str(colIndexWidth) + '},_{1:_>' + str(valueWidth) + '}_]\n').format(stack[row][1], stack[row][0])
         else:
-            text += ('[ {1:>' + str(colIndexWidth) + '}, {1:>' + str(valueWidth) + '} ]\n').format(stack[row][0], stack[row][1])
-    text += '[' + ('_' * (colIndexWidth + valueWidth + 4)) + ']\n'
+            text += ('[ {0:>' + str(colIndexWidth) + '}, {1:>' + str(valueWidth) + '} ]\n').format(stack[row][1], stack[row][0])
 
     # render sum
     text += '\nresult = {0}'.format(result)
