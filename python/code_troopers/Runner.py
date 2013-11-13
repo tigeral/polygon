@@ -2,16 +2,20 @@ import sys
 from MyStrategy import MyStrategy
 from RemoteProcessClient import RemoteProcessClient
 from model.Move import Move
+from time import sleep
 
 
 class Runner:
     def __init__(self):
+        sleep(3)
         if sys.argv.__len__() == 4:
             self.remote_process_client = RemoteProcessClient(sys.argv[1], int(sys.argv[2]))
             self.token = sys.argv[3]
         else:
             self.remote_process_client = RemoteProcessClient("localhost", 31001)
             self.token = "0000000000000000"
+        #next line enables my custom debugger window
+        debuggerEnabled = True
 
     def run(self):
         try:
