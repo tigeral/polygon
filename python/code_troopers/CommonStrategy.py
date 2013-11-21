@@ -24,10 +24,11 @@ class CommonStrategy():
             newData = Data()
             newData.clone(self.data)
             self.data = newData
-            self.debug.log(me, world, newData)
+            self.debug.log(me, world, game, move, newData)
         self.data.clearCurrent()
 
         self.analyzeWorld(me, world, self.data)
+        # implement some more actions here
 
     def analyzeWorld(self, me, world, data):
         #next lines were added just as an example
