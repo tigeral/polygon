@@ -1,4 +1,6 @@
 from CommonStrategy import CommonStrategy
+from model.ActionType import ActionType
+from model.TrooperType import TrooperType
 
 
 class SimpleStrategy(CommonStrategy):
@@ -11,14 +13,5 @@ class SimpleStrategy(CommonStrategy):
     def move(self, me, world, game, move):
         CommonStrategy.move(self, me, world, game, move)
         data = self.data
-        # self.analyzeEnemies(me, world, data)
-        #
-        # if data.totalThreat > data.totalBonusesAttraction:
-        #     data.moveMode = "hide"
-        # else:
-        #     data.moveMode = "collect"
-        # data.log.append("moveMode: %s" % data.moveMode)
-        #
-        # for tactic in self.tactics:
-        #     tactic.move(me, world, move, data)
-
+        if me.type == TrooperType.COMMANDER and world.move_index == 0:
+            move.action = ActionType.REQUEST_ENEMY_DISPOSITION

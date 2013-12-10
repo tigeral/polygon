@@ -7,7 +7,7 @@ from time import sleep
 
 class Runner:
     def __init__(self):
-        sleep(3)
+        sleep(4)
         if sys.argv.__len__() == 4:
             self.remote_process_client = RemoteProcessClient(sys.argv[1], int(sys.argv[2]))
             self.token = sys.argv[3]

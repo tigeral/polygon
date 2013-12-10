@@ -35,16 +35,24 @@ class Color():
         return (hexColor >> 16) & 0xff, (hexColor >> 8) & 0xff, hexColor & 0xff
 
     gridDottedLine = _fromHex(None, 0xaaaaaa)
+
     lowObstacle = _fromHex(None, 0xcfcfcf)
     mediumObstacle = _fromHex(None, 0x9f9f9f)
     highObstacle = _fromHex(None, 0x6f6f6f)
+
     lowVisibility = _fromHex(None, 0xaaaaff)
     midVisibility = _fromHex(None, 0x8888ff)
     fullVisibility = _fromHex(None, 0x5555ff)
+
     healAction = _fromHex(None, 0x88ff88)
     attackAction = _fromHex(None, 0xff8888)
     moveAction = _fromHex(None, 0x000000)
     activeTrooperIndicator = _fromHex(None, 0xbbbbbb)
+
+    playerColors = [_fromHex(None, 0x47b915),
+                    _fromHex(None, 0x2b6fd5),
+                    _fromHex(None, 0xfda001),
+                    _fromHex(None, 0xd80004)]
 
 
 class DebuggerWindow(Thread):
@@ -126,6 +134,7 @@ class DebuggerWindow(Thread):
                     self.isDirty = True
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     self.replay()
+                    self.isDirty = True
 
             clock.tick(60)
 
@@ -173,9 +182,20 @@ class DebuggerWindow(Thread):
         for bonus in world.bonuses:
             self.drawBonus(self.canvas, bonus)
 
-        #draw units
-        for unit in world.troopers:
-            self.drawUnit(self.canvas, unit, me)
+        #draw approximate player positions
+        for player in data.enemyPlayers.values():
+            if player.approximate_x >= 0:
+                self.highlightTargetCell(self.canvas, player.approximate_y, player.approximate_x,
+                                         Color.playerColors[player.id - 1], 3)
+
+        #draw my troopers
+        for trooper in world.troopers:
+            if trooper.teammate:
+                self.drawUnit(self.canvas, trooper, me, world)
+
+        #draw enemy troopers
+        for trooper in data.enemyTroopers.values():
+            self.drawUnit(self.canvas, trooper, me, world)
 
         #draw action
         self.drawAction(self.canvas, move, me, world, game)
@@ -195,16 +215,13 @@ class DebuggerWindow(Thread):
         pygame.display.flip()
         self.isDirty = False
 
-    def drawUnit(self, canvas, unit, me):
+    def drawUnit(self, canvas, unit, me, world):
         #load bonuses image file
         if not hasattr(self, 'unitsImage'):
             self.unitsImage = pygame.image.load_extended('res/units.png')
         unitBufCanvas = pygame.Surface((50, 50), pygame.SRCALPHA, 32)
         #draw player color
-        if unit.teammate:
-            pygame.draw.circle(unitBufCanvas, Color.green, (25, 25), 0)
-        else:
-            pygame.draw.circle(unitBufCanvas, Color.red, (25, 25), 0)
+        pygame.draw.circle(unitBufCanvas, Color.playerColors[unit.player_id - 1], (25, 25), 0)
         #copy image according to trooper type
         if unit.type is TrooperType.COMMANDER:
             unitBufCanvas.blit(self.unitsImage, (15, 14), (0, 0, 35, 22))
@@ -239,6 +256,12 @@ class DebuggerWindow(Thread):
         #draw to canvas
         x = unit.x * _cellSize - 10
         y = unit.y * _cellSize - 10
+        for trooper in world.troopers:
+            if unit.id == trooper.id:
+                break
+        else:
+            pygame.draw.line(unitBufCanvas, Color.gray, (15, 15), (35, 35), 2)
+            pygame.draw.line(unitBufCanvas, Color.gray, (35, 15), (15, 35), 2)
         canvas.blit(unitBufCanvas, (x, y))
 
     def drawBonus(self, canvas, bonus):
@@ -414,24 +437,24 @@ class DebuggerWindow(Thread):
                     pygame.draw.rect(canvas, color,
                                      (col * _cellSize + 1, row * _cellSize + 1, _cellSize - 2, _cellSize - 2), 0)
 
-    def highlightTargetCell(self, canvas, row, col, color):
+    def highlightTargetCell(self, canvas, row, col, color, width=1):
         lineLength = 10
         pygame.draw.line(canvas, color, (col * _cellSize, row * _cellSize),
-                                        (col * _cellSize + lineLength, row * _cellSize), 1)
+                                        (col * _cellSize + lineLength, row * _cellSize), width)
         pygame.draw.line(canvas, color, ((col + 1) * _cellSize - lineLength, row * _cellSize),
-                                        ((col + 1) * _cellSize, row * _cellSize), 1)
+                                        ((col + 1) * _cellSize, row * _cellSize), width)
         pygame.draw.line(canvas, color, ((col + 1) * _cellSize, row * _cellSize),
-                                        ((col + 1) * _cellSize, row * _cellSize + lineLength), 1)
+                                        ((col + 1) * _cellSize, row * _cellSize + lineLength), width)
         pygame.draw.line(canvas, color, ((col + 1) * _cellSize, (row + 1) * _cellSize - lineLength),
-                                        ((col + 1) * _cellSize, (row + 1) * _cellSize), 1)
+                                        ((col + 1) * _cellSize, (row + 1) * _cellSize), width)
         pygame.draw.line(canvas, color, ((col + 1) * _cellSize, (row + 1) * _cellSize),
-                                        ((col + 1) * _cellSize - lineLength, (row + 1) * _cellSize), 1)
+                                        ((col + 1) * _cellSize - lineLength, (row + 1) * _cellSize), width)
         pygame.draw.line(canvas, color, (col * _cellSize + lineLength, (row + 1) * _cellSize),
-                                        (col * _cellSize, (row + 1) * _cellSize), 1)
+                                        (col * _cellSize, (row + 1) * _cellSize), width)
         pygame.draw.line(canvas, color, (col * _cellSize, (row + 1) * _cellSize),
-                                        (col * _cellSize, (row + 1) * _cellSize - lineLength), 1)
+                                        (col * _cellSize, (row + 1) * _cellSize - lineLength), width)
         pygame.draw.line(canvas, color, (col * _cellSize, row * _cellSize + lineLength),
-                                        (col * _cellSize, row * _cellSize), 1)
+                                        (col * _cellSize, row * _cellSize), width)
 
     def drawGameField(self, canvas, world):
         canvas.fill(Color.white)
@@ -508,6 +531,24 @@ class DebuggerWindow(Thread):
                 self.selectedTankDetails = tank.id
                 self.isDirty = True
                 return
+
+
+def toGrayScale(surface):
+    arr = pygame.surfarray.pixels2d(surface)
+    result = []
+    for col in arr:
+        resultColumn = []
+        result.append(resultColumn)
+        for pixel in col:
+            red = (pixel & 0xff0000) >> 16
+            green = (pixel & 0x00ff00) >> 8
+            blue = (pixel & 0x0000ff)
+            # alpha = pixel & 0x000000ff
+            # alpha = 255
+            gray = (red + green + blue) / 3
+            resultPixel = (gray << 16) + (gray << 8) + gray
+            resultColumn.append(resultPixel)
+    return pygame.surfarray.make_surface(arr)
 
 
 def drawDottedLine(surface, color, startPoint, endPoint, interval):
