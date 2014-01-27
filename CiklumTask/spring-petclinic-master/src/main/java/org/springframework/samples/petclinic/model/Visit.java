@@ -20,6 +20,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -62,6 +63,7 @@ public class Visit extends BaseEntity {
      */
     @NotEmpty
     @Column(name = "reason")
+    @Size(max = 255)
     private String reason;
 
 

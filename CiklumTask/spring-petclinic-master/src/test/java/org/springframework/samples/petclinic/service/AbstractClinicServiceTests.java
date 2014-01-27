@@ -221,7 +221,7 @@ public abstract class AbstractClinicServiceTests {
         try {
             this.clinicService.saveVisit(visit);
             this.clinicService.savePet(pet7);
-            assertTrue("Emtpy visit.reason value was writen successfuly.", true);
+            assertTrue("Emtpy visit.reason value was writen successfully.", true);
         } catch (ConstraintViolationException e) {
             //do nothing
         }
@@ -254,11 +254,9 @@ public abstract class AbstractClinicServiceTests {
         try {
             this.clinicService.saveVisit(visit);
             this.clinicService.savePet(pet7);
-            assertTrue("visit.reason with a value which is 255 symbols length saved with error.", true);
-        } catch (DataIntegrityViolationException e) {
-            //this happened because of work of query builder implementation
+            assertTrue("visit.reason with a value greater than 255 symbols length saved successfully.", true);
         } catch (ConstraintViolationException e) {
-            //this is expected behavior. Unfortunately, the code execution never come here.
+            //do nothing
         }
     }
 }
