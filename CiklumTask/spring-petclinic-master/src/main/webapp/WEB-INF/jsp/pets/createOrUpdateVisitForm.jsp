@@ -49,6 +49,19 @@
             </div>
         </div>
         <div class="control-group">
+            <label class="control-label">Reason </label>
+
+            <div class="controls">
+                <form:input list="visitReasons" path="reason"/>
+                <datalist id="visitReasons">
+                    <c:forEach items="${visitReasons}" var="visitReason">
+                        <option value="${visitReason}">
+                    </c:forEach>
+                </datalist>
+                <span class="help-inline"><form:errors path="reason"/></span>
+            </div>
+        </div>
+        <div class="control-group">
             <label class="control-label">Description </label>
 
             <div class="controls">
@@ -67,12 +80,14 @@
     <table style="width: 333px;">
         <tr>
             <th>Date</th>
+            <th>Reason</th>
             <th>Description</th>
         </tr>
         <c:forEach var="visit" items="${visit.pet.visits}">
             <c:if test="${!visit['new']}">
                 <tr>
                     <td><joda:format value="${visit.date}" pattern="yyyy/MM/dd"/></td>
+                    <td><c:out value="${visit.reason}"/></td>
                     <td><c:out value="${visit.description}"/></td>
                 </tr>
             </c:if>

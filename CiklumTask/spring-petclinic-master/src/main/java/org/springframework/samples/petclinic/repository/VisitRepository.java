@@ -42,4 +42,11 @@ public interface VisitRepository {
 
     List<Visit> findByPetId(Integer petId);
 
+    /**
+     * Provides list of predefined values for Visit.reason property.
+     * Could be used to speed up input of most recent values.
+     *
+     * @return list of String values.
+     */
+    List<String> findVisitReasons();
 }

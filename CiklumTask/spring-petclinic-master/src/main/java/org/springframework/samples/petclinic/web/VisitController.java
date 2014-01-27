@@ -63,6 +63,7 @@ public class VisitController {
         Visit visit = new Visit();
         pet.addVisit(visit);
         model.put("visit", visit);
+        model.put("visitReasons", clinicService.findVisitReasons());
         return "pets/createOrUpdateVisitForm";
     }
 

@@ -67,12 +67,14 @@
                         <thead>
                         <tr>
                             <th>Visit Date</th>
+                            <th>Reason</th>
                             <th>Description</th>
                         </tr>
                         </thead>
                         <c:forEach var="visit" items="${pet.visits}">
                             <tr>
                                 <td><joda:format value="${visit.date}" pattern="yyyy-MM-dd"/></td>
+                                <td><c:out value="${visit.reason}"/></td>
                                 <td><c:out value="${visit.description}"/></td>
                             </tr>
                         </c:forEach>
@@ -90,6 +92,9 @@
 			                        <spring:param name="petId" value="${pet.id}"/>
 			                    </spring:url>
 			                    <a href="${fn:escapeXml(visitUrl)}">Add Visit</a>
+                            </td>
+                            <td>
+                                <!-- this empty row is required for correction of table layout -->
                             </td>
                        	</tr>
                     </table>

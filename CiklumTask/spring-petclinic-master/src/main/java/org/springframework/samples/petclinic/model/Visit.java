@@ -57,6 +57,13 @@ public class Visit extends BaseEntity {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
+    /**
+     * Holds value of property reason.
+     */
+    @NotEmpty
+    @Column(name = "reason")
+    private String reason;
+
 
     /**
      * Creates a new instance of Visit for the current date
@@ -118,6 +125,24 @@ public class Visit extends BaseEntity {
      */
     public void setPet(Pet pet) {
         this.pet = pet;
+    }
+
+    /**
+     * Getter for property reason.
+     *
+     * @return Value of property reason.
+     */
+    public String getReason() {
+        return reason;
+    }
+
+    /**
+     * Setter for property reason.
+     *
+     * @param reason New value of property reason.
+     */
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
 }

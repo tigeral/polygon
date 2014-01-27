@@ -85,7 +85,8 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
                 .addValue("id", visit.getId())
                 .addValue("visit_date", visit.getDate().toDate())
                 .addValue("description", visit.getDescription())
-                .addValue("pet_id", visit.getPet().getId());
+                .addValue("pet_id", visit.getPet().getId())
+                .addValue("reason", visit.getReason());
     }
 
     @Override
@@ -105,6 +106,13 @@ public class JdbcVisitRepositoryImpl implements VisitRepository {
                 },
                 petId);
         return visits;
+    }
+
+    @Override
+    public List<String> findVisitReasons() {
+        final List<String> reasons = this.jdbcTemplate.queryForList(
+                "SELECT description FROM visit_reasons", String.class);
+        return reasons;
     }
 
 }

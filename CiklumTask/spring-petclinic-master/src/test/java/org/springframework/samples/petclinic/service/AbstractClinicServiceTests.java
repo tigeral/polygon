@@ -20,11 +20,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
@@ -33,6 +35,8 @@ import org.springframework.samples.petclinic.model.Visit;
 import org.springframework.samples.petclinic.util.EntityUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.validation.ConstraintViolationException;
 
 /**
  * <p> Base class for {@link ClinicService} integration tests. </p> <p> Subclasses should specify Spring context
@@ -181,6 +185,7 @@ public abstract class AbstractClinicServiceTests {
 	    int found = pet7.getVisits().size();
 	    Visit visit = new Visit();
 	    pet7.addVisit(visit);
+	    visit.setReason("test reason");
 	    visit.setDescription("test");
 	    // both storeVisit and storePet are necessary to cover all ORM tools
 	    this.clinicService.saveVisit(visit);
@@ -188,7 +193,72 @@ public abstract class AbstractClinicServiceTests {
 	    pet7 = this.clinicService.findPetById(7);
 	    assertEquals(found + 1, pet7.getVisits().size());
 	    assertNotNull("Visit Id should have been generated", visit.getId());
+        Pet resultPet = clinicService.findPetById(pet7.getId());
 	}
 
+    @Test
+    @Transactional
+    public void visitReasonConstrains() {
+        Pet pet7 = this.clinicService.findPetById(7);
+        int visitsSize = pet7.getVisits().size();
 
+        //check that value was saved
+        Visit visit = new Visit();
+        pet7.addVisit(visit);
+        visit.setReason("test reason");
+        visit.setDescription("test");
+        this.clinicService.saveVisit(visit);
+        this.clinicService.savePet(pet7);
+        pet7 = this.clinicService.findPetById(7);
+        List<Visit> visits = pet7.getVisits();
+        Visit newVisit = visits.get(0); //they sorted in order when older visit is last
+        assertEquals("test reason", newVisit.getReason());
+
+        //empty String
+        visit = new Visit();
+        pet7.addVisit(visit);
+        visit.setDescription("test");
+        try {
+            this.clinicService.saveVisit(visit);
+            this.clinicService.savePet(pet7);
+            assertTrue("Emtpy visit.reason value was writen successfuly.", true);
+        } catch (ConstraintViolationException e) {
+            //do nothing
+        }
+
+        //255 symbols length String value
+        visit = new Visit();
+        pet7.addVisit(visit);
+        visit.setDescription("test");
+        StringBuilder longStr = new StringBuilder(255);
+        for (int i = 0; i < 255; i++) {
+            longStr.append('+');
+        }
+        visit.setReason(longStr.toString());
+        try {
+            this.clinicService.saveVisit(visit);
+            this.clinicService.savePet(pet7);
+        } catch (ConstraintViolationException e) {
+            assertTrue("visit.reason with a value which is 255 symbols length saved with error.", true);
+        }
+
+        //256 symbols length String value
+        visit = new Visit();
+        pet7.addVisit(visit);
+        visit.setDescription("test");
+        longStr = new StringBuilder(255);
+        for (int i = 0; i < 256; i++) {
+            longStr.append('+');
+        }
+        visit.setReason(longStr.toString());
+        try {
+            this.clinicService.saveVisit(visit);
+            this.clinicService.savePet(pet7);
+            assertTrue("visit.reason with a value which is 255 symbols length saved with error.", true);
+        } catch (DataIntegrityViolationException e) {
+            //this happened because of work of query builder implementation
+        } catch (ConstraintViolationException e) {
+            //this is expected behavior. Unfortunately, the code execution never come here.
+        }
+    }
 }

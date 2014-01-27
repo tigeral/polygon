@@ -78,6 +78,13 @@ public class ClinicServiceImpl implements ClinicService {
         ownerRepository.save(owner);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "predefinedVisitReasons")
+    public Collection<String> findVisitReasons() throws DataAccessException {
+        return visitRepository.findVisitReasons();
+    }
+
 
     @Override
     @Transactional

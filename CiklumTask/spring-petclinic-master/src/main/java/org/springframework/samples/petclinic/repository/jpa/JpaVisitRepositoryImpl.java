@@ -62,4 +62,11 @@ public class JpaVisitRepositoryImpl implements VisitRepository {
         return query.getResultList();
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<String> findVisitReasons() {
+        Query query = this.em.createQuery("SELECT description FROM VisitReason", String.class);
+        return query.getResultList();
+    }
+
 }
