@@ -1,4 +1,4 @@
 polygon
 =======
 
-my personal testing ground for testing different technologies (from russian "полигон")
+My personal playground for testing different technologies (from ukrainian "полігон")
